@@ -1,0 +1,10 @@
+{
+  "name": "pqh-functions",
+  "private": true,
+  "type": "module",
+  "engines": { "node": "20" },
+  "main": "build/index.js",
+  "scripts": { "build": "tsc", "deploy": "npm run build && firebase deploy --only functions" },
+  "dependencies": { "firebase-admin": "latest", "firebase-functions": "latest", "googleapis": "latest" },
+  "devDependencies": { "typescript": "latest", "@types/node": "latest" }
+}

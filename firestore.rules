@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function me() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function isAreaManager() { return signedIn() && me().role == 'area_manager'; }
+    function isStoreManager() { return signedIn() && me().role == 'store_manager'; }
+    function isManagerFor(storeId) { return isAreaManager() || (isStoreManager() && me().storeId == storeId); }
+    function validMetrics(metrics) { return metrics.keys().hasOnly(['grossAdds','upgrades','homeInternet','watches','tablets','accessories','upgradePlus','ild','leases','billPayAdds','milestoneSheets']); }
+    match /stores/{storeId} { allow read: if signedIn(); allow write: if isAreaManager(); }
+    match /users/{userId} {
+      allow create: if signedIn() && request.auth.uid == userId && request.resource.data.role == 'employee' && request.resource.data.status == 'pending';
+      allow read: if signedIn() && (request.auth.uid == userId || isManagerFor(resource.data.storeId));
+      allow update: if signedIn() && ((request.auth.uid == userId && request.resource.data.role == resource.data.role && request.resource.data.status == resource.data.status && request.resource.data.storeId == resource.data.storeId) || isManagerFor(resource.data.storeId));
+      allow delete: if false;
+    }
+    match /dailyEntries/{entryId} {
+      allow read: if signedIn() && (resource.data.employeeId == request.auth.uid || isManagerFor(resource.data.storeId));
+      allow create: if signedIn() && request.resource.data.employeeId == request.auth.uid && me().status == 'active' && validMetrics(request.resource.data.metrics);
+      allow update: if signedIn() && (resource.data.employeeId == request.auth.uid || isManagerFor(resource.data.storeId)) && request.resource.data.updatedBy == request.auth.uid && validMetrics(request.resource.data.metrics);
+      allow delete: if false;
+    }
+    match /monthlyGoals/{goalId} { allow read: if signedIn() && (resource.data.employeeId == request.auth.uid || isManagerFor(resource.data.storeId)); allow write: if signedIn() && isManagerFor(request.resource.data.storeId); }
+    match /milestoneRules/{ruleId} { allow read: if signedIn(); allow write: if isAreaManager(); }
+    match /monthlyEmployeeSummaries/{summaryId} { allow read: if signedIn() && (resource.data.employeeId == request.auth.uid || isManagerFor(resource.data.storeId)); allow write: if false; }
+    match /monthlyStoreSummaries/{summaryId} { allow read: if signedIn(); allow write: if false; }
+    match /auditEvents/{auditId} { allow read: if signedIn() && isManagerFor(resource.data.storeId); allow write: if false; }
+    match /scheduleShifts/{shiftId} {
+      allow read: if signedIn() && (resource.data.employeeId == request.auth.uid || (resource.data.storeId == me().storeId) || isManagerFor(resource.data.storeId));
+      allow write: if false;
+    }
+    match /scheduleNotifications/{notificationId} {
+      allow read: if signedIn() && resource.data.employeeId == request.auth.uid;
+      allow update: if signedIn() && resource.data.employeeId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      allow create, delete: if false;
+    }
+    match /pushDevices/{deviceId} {
+      allow read, write: if signedIn() && request.auth.uid == resource.data.employeeId;
+    }
+    match /scheduleSyncRuns/{runId} { allow read: if isAreaManager(); allow write: if false; }
+  }
+}

@@ -1,0 +1,4 @@
+{ "indexes": [
+  { "collectionGroup": "dailyEntries", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "employeeId", "order": "ASCENDING" }, { "fieldPath": "businessDate", "order": "DESCENDING" }] },
+  { "collectionGroup": "monthlyGoals", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "storeId", "order": "ASCENDING" }, { "fieldPath": "monthKey", "order": "ASCENDING" }] }
+], "fieldOverrides": [] }
