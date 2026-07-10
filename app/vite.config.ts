@@ -9,6 +9,9 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
+  server: {
+    open: true
+  },
   plugins: [react(), VitePWA({ registerType: 'autoUpdate', manifest: {
     name: 'Montana PQH Team', short_name: 'PQH Team', description: 'Daily performance and goals for the Montana PQH team.',
     theme_color: '#9bd436', background_color: '#071008', display: 'standalone', start_url: '/'
