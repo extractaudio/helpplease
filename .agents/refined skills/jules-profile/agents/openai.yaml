@@ -1,0 +1,3 @@
+interface:
+  display_name: "Jules / Codex Profile"
+  short_description: "Harness-specific set_plan and submit mechanics for the plan and modify skills"

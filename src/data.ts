@@ -19,7 +19,7 @@ const monthKey = today.slice(0, 7)
 const seed = (grossAdds: number, upgrades: number, homeInternet: number, accessories: number) => ({ ...zeroMetrics(), grossAdds, upgrades, homeInternet, accessories, watches: 1, leases: 1, upgradePlus: 1, milestoneSheets: 1 })
 
 export const initialState: AppState = {
-  currentUserId: 'morgan', trustedDevice: false,
+  currentUserId: 'morgan', trustedDevice: false, stores,
   profiles: [
     { uid: 'morgan', fullName: 'Morgan Fields', workEmail: 'morgan.fields@example.com', personalGoogleEmail: 'morgan.fields@example.com', cellPhone: '(406) 555-0101', jobTitle: 'Area Manager', storeId: 'helena', role: 'area_manager', status: 'active' },
     { uid: 'alex', fullName: 'Alex Rivera', workEmail: 'alex.rivera@example.com', personalGoogleEmail: 'alex.rivera@example.com', cellPhone: '(406) 555-0102', jobTitle: 'Store Manager', storeId: 'bozeman', role: 'store_manager', status: 'active' },

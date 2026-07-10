@@ -1,0 +1,3 @@
+interface:
+  display_name: "Write Plan"
+  short_description: "Write a phase-based implementation plan to Fix_#.md (planning only)"

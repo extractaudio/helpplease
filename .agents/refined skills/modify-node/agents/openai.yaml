@@ -1,0 +1,3 @@
+interface:
+  display_name: "Modify Node"
+  short_description: "Change a node type while enforcing the Node Architecture Mandates"

@@ -1,0 +1,3 @@
+interface:
+  display_name: "Modify Panel"
+  short_description: "Change a UI panel while preserving panel mounting, API, and persistence conventions"

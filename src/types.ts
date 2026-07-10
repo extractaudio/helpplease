@@ -9,7 +9,7 @@ export interface UserProfile { uid: string; fullName: string; workEmail: string;
 export interface DailyEntry { id: string; employeeId: string; storeId: StoreId; businessDate: string; metrics: Metrics; notes: string; updatedBy: string; updatedAt: string }
 export interface MonthlyGoal { id: string; employeeId: string; storeId: StoreId; monthKey: string; targets: Metrics }
 export interface MilestoneRule { id: string; label: string; metric: MetricKey; threshold: number; fixedPayoutCents?: number; commissionBand?: string; active: boolean }
-export interface AppState { profiles: UserProfile[]; entries: DailyEntry[]; goals: MonthlyGoal[]; rules: MilestoneRule[]; shifts: ScheduleShift[]; notifications: ScheduleNotification[]; currentUserId: string; trustedDevice: boolean }
+export interface AppState { profiles: UserProfile[]; entries: DailyEntry[]; goals: MonthlyGoal[]; rules: MilestoneRule[]; shifts: ScheduleShift[]; notifications: ScheduleNotification[]; stores: Store[]; currentUserId: string; trustedDevice: boolean }
 
 export interface ScheduleShift { id: string; employeeId: string; employeeName: string; storeId: StoreId; businessDate: string; startTime: string; endTime: string; jobTitle: string; notes: string; sourceHash: string; syncedAt: string }
 export interface ScheduleNotification { id: string; employeeId: string; type: 'added' | 'changed' | 'removed'; shiftId: string; message: string; read: boolean; createdAt: string }

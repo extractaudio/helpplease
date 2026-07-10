@@ -1,0 +1,3 @@
+interface:
+  display_name: "Execute Plan"
+  short_description: "Implement one phase of a Fix_#.md plan, verify it, then strike it"

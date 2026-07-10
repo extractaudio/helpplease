@@ -1,21 +1,22 @@
 import { useEffect, useState } from 'react'
-import { initialState } from '../data'
-import { firebaseEnabled } from '../firebase'
-import { saveEntry, saveGoal, saveNotification, saveProfile } from '../repository'
-import { useFirebaseSession, useRemoteData } from '../useAppData'
-import type { AppState } from '../types'
+import { hydrateAppState, storesForDisplay } from '@/domain/app-state'
+import { initialState } from '@/data'
+import { firebaseEnabled } from '@/services/firebase'
+import { saveEntry, saveGoal, saveNotification, saveProfile, saveStore } from '@/services/repository'
+import { useFirebaseSession, useRemoteData } from '@/services/useAppData'
+import type { AppState } from '@/domain/types'
 
 const storageKey = 'pqh-team-demo-v1'
 
 function useDemoState() {
-  const [state, setState] = useState<AppState>(() => { try { return JSON.parse(localStorage.getItem(storageKey) || '') } catch { return initialState } })
+  const [state, setState] = useState<AppState>(() => { try { return hydrateAppState(JSON.parse(localStorage.getItem(storageKey) || '')) } catch { return initialState } })
   useEffect(() => { localStorage.setItem(storageKey, JSON.stringify(state)) }, [state])
   return [state, setState] as const
 }
 
 export function useApplicationState(liveAccess: boolean) {
   const [demo, setDemo] = useDemoState(); const session = useFirebaseSession(); const remote = useRemoteData(session.user)
-  const state = liveAccess && firebaseEnabled && session.user && remote.profile && remote.data ? { ...demo, ...remote.data, currentUserId: remote.profile.uid } : demo
+  const state = liveAccess && firebaseEnabled && session.user && remote.profile && remote.data ? { ...demo, ...remote.data, stores: storesForDisplay(remote.data.stores), currentUserId: remote.profile.uid } : demo
   const changed = <T, K extends keyof T>(before: T[], after: T[], id: K) => after.filter(value => JSON.stringify(value) !== JSON.stringify(before.find(item => item[id] === value[id])))
   const update = (fn: (value: AppState) => AppState) => {
     const next = fn(state)
@@ -24,7 +25,8 @@ export function useApplicationState(liveAccess: boolean) {
       ...changed(state.profiles, next.profiles, 'uid').map(saveProfile),
       ...changed(state.entries, next.entries, 'id').map(saveEntry),
       ...changed(state.goals, next.goals, 'id').map(saveGoal),
-      ...changed(state.notifications, next.notifications, 'id').map(saveNotification)
+      ...changed(state.notifications, next.notifications, 'id').map(saveNotification),
+      ...changed(state.stores, next.stores, 'id').map(saveStore)
     ])
   }
   return { state, update, session, remote }

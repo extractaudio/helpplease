@@ -1,0 +1,3 @@
+interface:
+  display_name: "Refine Plan"
+  short_description: "Deepen and harden an existing Fix_#.md plan in place (planning only)"

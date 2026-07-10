@@ -11,6 +11,8 @@ npm run dev
 
 The app launches in a fully interactive local demo mode, seeded with an area manager, store manager, active employee, a pending employee, current goals, and daily performance data. Use the profile menu to sign out and preview each role from the sign-in demo selector. Browser storage retains demo changes; clear site storage to reset.
 
+Store Directory is available to all signed-in roles. Area managers can edit every store; store managers can edit their assigned store; employees have read-only contact, map, messaging, schedule, and live-status actions.
+
 ## Connect Firebase
 
 1. Copy `.env.example` to `.env.local` and insert the Firebase web-app configuration values.

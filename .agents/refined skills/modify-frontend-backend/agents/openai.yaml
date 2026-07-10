@@ -1,0 +1,3 @@
+interface:
+  display_name: "Modify Frontend + Backend"
+  short_description: "Coordinated contract-first change keeping FE and BE in lockstep"

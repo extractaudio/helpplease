@@ -7,7 +7,7 @@ service cloud.firestore {
     function isStoreManager() { return signedIn() && me().role == 'store_manager'; }
     function isManagerFor(storeId) { return isAreaManager() || (isStoreManager() && me().storeId == storeId); }
     function validMetrics(metrics) { return metrics.keys().hasOnly(['grossAdds','upgrades','homeInternet','watches','tablets','accessories','upgradePlus','ild','leases','billPayAdds','milestoneSheets']); }
-    match /stores/{storeId} { allow read: if signedIn(); allow write: if isAreaManager(); }
+    match /stores/{storeId} { allow read: if signedIn(); allow write: if isManagerFor(storeId); }
     match /users/{userId} {
       allow create: if signedIn() && request.auth.uid == userId && request.resource.data.role == 'employee' && request.resource.data.status == 'pending';
       allow read: if signedIn() && (request.auth.uid == userId || isManagerFor(resource.data.storeId));
