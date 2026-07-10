@@ -1,6 +1,5 @@
-import { getApp, getApps, initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
-import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore'
+import type { Auth } from 'firebase/auth'
+import type { Firestore } from 'firebase/firestore'
 
 const config = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -12,8 +11,24 @@ const config = {
 }
 
 export const firebaseEnabled = Boolean(config.apiKey && config.projectId)
-export const firebaseApp = firebaseEnabled ? (getApps().length ? getApp() : initializeApp(config)) : undefined
-export const auth = firebaseApp ? getAuth(firebaseApp) : undefined
-// Persistent cache is initialized only after the profile's trusted-device consent in production wiring.
-export const db = firebaseApp ? initializeFirestore(firebaseApp, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) }) : undefined
-export const firestore = db || (firebaseApp ? getFirestore(firebaseApp) : undefined)
+
+export type FirebaseServices = { auth: Auth; firestore: Firestore }
+
+let servicesPromise: Promise<FirebaseServices> | undefined
+
+// The Firebase SDK (~800KB) is only fetched once a caller actually needs it, so demo-only or
+// unconfigured deployments never download it. Callers share one in-flight/initialized instance.
+export function loadFirebase(): Promise<FirebaseServices> {
+  if (!firebaseEnabled) return Promise.reject(new Error('Firebase is not configured.'))
+  if (!servicesPromise) {
+    servicesPromise = Promise.all([import('firebase/app'), import('firebase/auth'), import('firebase/firestore')])
+      .then(([{ getApp, getApps, initializeApp }, { getAuth }, { initializeFirestore, persistentLocalCache, persistentMultipleTabManager }]) => {
+        const app = getApps().length ? getApp() : initializeApp(config)
+        const auth = getAuth(app)
+        // Persistent cache is initialized only after the profile's trusted-device consent in production wiring.
+        const firestore = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) })
+        return { auth, firestore }
+      })
+  }
+  return servicesPromise
+}

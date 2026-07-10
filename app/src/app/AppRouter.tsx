@@ -3,7 +3,7 @@ import { MySchedulePage, StoreOpenPage, StoreSchedulePage } from '@/features/sch
 import { EmployeesPage, ProfilePage } from '@/features/administration'
 import { StoreDirectoryPage } from '@/features/stores'
 import type { Page } from '@/shared/navigation'
-import type { AppState, DailyEntry, Metrics, MonthlyGoal, UserProfile } from '@/domain/types'
+import type { AppState, DailyEntry, Metrics, MonthlyGoal, StoreId, UserProfile } from '@/domain/types'
 
 type Props = {
   page: Page
@@ -13,12 +13,14 @@ type Props = {
   isArea: boolean
   actuals: Metrics
   goal?: MonthlyGoal
+  scheduleStoreId?: StoreId
   selectPage: (page: Page) => void
+  onScheduleStore: (storeId: StoreId) => void
   update: (change: (state: AppState) => AppState) => void
   onSignOut: () => void
 }
 
-export function AppRouter({ page, state, user, isManager, isArea, actuals, goal, selectPage, update, onSignOut }: Props) {
+export function AppRouter({ page, state, user, isManager, isArea, actuals, goal, scheduleStoreId, selectPage, onScheduleStore, update, onSignOut }: Props) {
   const saveEntry = (entry: DailyEntry) =>
     update(current => ({ ...current, entries: [...current.entries.filter(item => item.id !== entry.id), entry] }))
 
@@ -38,11 +40,11 @@ export function AppRouter({ page, state, user, isManager, isArea, actuals, goal,
     case 'schedule':
       return <MySchedulePage state={state} user={user} onChange={update}/>
     case 'storeSchedule':
-      return <StoreSchedulePage state={state} user={user}/>
+      return <StoreSchedulePage state={state} user={user} initialStoreId={scheduleStoreId}/>
     case 'open':
       return <StoreOpenPage shifts={state.shifts}/>
     case 'directory':
-      return <StoreDirectoryPage state={state} user={user} onChange={update} onSchedule={() => selectPage('storeSchedule')}/>
+      return <StoreDirectoryPage state={state} user={user} onChange={update} onSchedule={onScheduleStore}/>
     case 'employees':
       return <EmployeesPage state={state} user={user} onChange={update} isArea={isArea}/>
     case 'profile':

@@ -1,5 +1,5 @@
 import { metricLabels, storeName } from '@/data'
-import { addMetrics, currentMonth, statusFor } from '@/domain/metrics'
+import { addMetrics, currentMonth, monthlyActualsFor, monthlyGoalFor, statusFor } from '@/domain/metrics'
 import { metricKeys } from '@/domain/types'
 import { PageIntro } from '@/shared/ui'
 import type { AppState, UserProfile } from '@/domain/types'
@@ -10,10 +10,11 @@ export function Dashboard({ state, user, isManager }: { state: AppState; user: U
     ? state.profiles.filter(profile => profile.status === 'active' && (user.role === 'area_manager' || profile.storeId === user.storeId))
     : [user]
   const rows = people.map(person => {
-    const actual = addMetrics(state.entries.filter(entry => entry.employeeId === person.uid && entry.businessDate.startsWith(month)).map(entry => entry.metrics))
-    const goal = state.goals.find(item => item.employeeId === person.uid && item.monthKey === month)?.targets
+    const actual = monthlyActualsFor(state.entries, person.uid, month)
+    const goal = monthlyGoalFor(state.goals, person.uid, month)?.targets
     return { person, actual, goal }
   })
+  const totals = addMetrics(rows.map(row => row.actual))
   return (
     <section className="page">
       <PageIntro
@@ -50,7 +51,7 @@ export function Dashboard({ state, user, isManager }: { state: AppState; user: U
       </div>
       <div className="goal-cards">
         {metricKeys.slice(0, 6).map(key => {
-          const actual = addMetrics(rows.map(row => row.actual))[key]
+          const actual = totals[key]
           const target = rows.reduce((sum, row) => sum + (row.goal?.[key] || 0), 0)
           const pct = target ? Math.round(actual / target * 100) : 0
           return (

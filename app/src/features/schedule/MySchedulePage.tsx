@@ -3,9 +3,10 @@ import { Bell, CalendarDays, Download, ExternalLink } from 'lucide-react'
 import { storeName, stores } from '@/data'
 import { currentBusinessDate } from '@/domain/metrics'
 import { hoursFor, toIcs } from '@/domain/schedule'
+import { storeStatusAt } from '@/domain/store-hours'
 import { PageIntro, Stat } from '@/shared/ui'
 import { ShiftCard } from './ShiftCard'
-import { filteredView, googleLink, storeOpenLabel } from './helpers'
+import { filteredView, googleLink } from './helpers'
 import type { AppState, ScheduleShift, UserProfile } from '@/domain/types'
 
 export function MySchedulePage({ state, user, onChange }: { state: AppState; user: UserProfile; onChange: (change: (state: AppState) => AppState) => void }) {
@@ -16,13 +17,13 @@ export function MySchedulePage({ state, user, onChange }: { state: AppState; use
     .sort((a, b) => `${a.businessDate}${a.startTime}`.localeCompare(`${b.businessDate}${b.startTime}`))
   const upcoming = mine.filter(shift => shift.businessDate >= today)
   const next = upcoming[0]
-  const weekHours = mine
-    .filter(shift => shift.businessDate >= today && shift.businessDate <= `${today.slice(0, 8)}99`)
-    .reduce((sum, shift) => sum + hoursFor(shift), 0)
+  const weekHours = filteredView(mine, 'weekly', today).reduce((sum, shift) => sum + hoursFor(shift), 0)
   const monthHours = mine
     .filter(shift => shift.businessDate.startsWith(today.slice(0, 7)))
     .reduce((sum, shift) => sum + hoursFor(shift), 0)
   const store = stores.find(item => item.id === user.storeId)!
+  const isStoreOpen = storeStatusAt(user.storeId, new Date(), state.shifts).isOpen
+  const shownShifts = filteredView(mine, view, today)
   const notices = state.notifications.filter(notice => notice.employeeId === user.uid && !notice.read)
   const download = (selection: ScheduleShift[]) => {
     const blob = new Blob([toIcs(selection, stores)], { type: 'text/calendar' })
@@ -54,7 +55,7 @@ export function MySchedulePage({ state, user, onChange }: { state: AppState; use
         <Stat label="Next shift" value={next ? `${next.businessDate} · ${next.startTime}` : 'None'} detail={next ? `${next.jobTitle} · ${storeName(next.storeId)}` : 'No upcoming shifts'}/>
         <Stat label="Hours this week" value={weekHours.toFixed(1)} detail="Scheduled hours"/>
         <Stat label="Hours this month" value={monthHours.toFixed(1)} detail="Scheduled hours"/>
-        <Stat label="Store status" value={storeOpenLabel()} detail={next ? `${storeName(next.storeId)} shift` : 'Published hours'}/>
+        <Stat label="Store status" value={isStoreOpen ? 'Open' : 'Closed'} detail={next ? `${storeName(next.storeId)} shift` : 'Published hours'}/>
       </div>
       <div className="schedule-toolbar">
         <div className="view-switch">
@@ -69,8 +70,8 @@ export function MySchedulePage({ state, user, onChange }: { state: AppState; use
         </div>
       </div>
       <div className="shift-list">
-        {filteredView(mine, view, today).length ? (
-          filteredView(mine, view, today).map(shift => (
+        {shownShifts.length ? (
+          shownShifts.map(shift => (
             <ShiftCard key={shift.id} shift={shift} store={stores.find(item => item.id === shift.storeId)!} today={today}/>
           ))
         ) : (

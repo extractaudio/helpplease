@@ -16,11 +16,16 @@ function useDemoState() {
 
 export function useApplicationState(liveAccess: boolean) {
   const [demo, setDemo] = useDemoState(); const session = useFirebaseSession(); const remote = useRemoteData(session.user)
-  const state = liveAccess && firebaseEnabled && session.user && remote.profile && remote.data ? { ...demo, ...remote.data, stores: storesForDisplay(remote.data.stores), currentUserId: remote.profile.uid } : demo
+  // Single source of truth for "a live session is fully loaded" -- state selection and the
+  // write-target decision in update() must always agree, or writes can reach the wrong store.
+  const liveReady = liveAccess && firebaseEnabled && Boolean(session.user) && Boolean(remote.profile) && Boolean(remote.data)
+  const state = liveReady && remote.profile && remote.data
+    ? { ...demo, ...remote.data, stores: storesForDisplay(remote.data.stores), currentUserId: remote.profile.uid }
+    : demo
   const changed = <T, K extends keyof T>(before: T[], after: T[], id: K) => after.filter(value => JSON.stringify(value) !== JSON.stringify(before.find(item => item[id] === value[id])))
   const update = (fn: (value: AppState) => AppState) => {
     const next = fn(state)
-    if (!liveAccess || !firebaseEnabled || !session.user) { setDemo(next); return }
+    if (!liveReady) { setDemo(next); return }
     void Promise.all([
       ...changed(state.profiles, next.profiles, 'uid').map(saveProfile),
       ...changed(state.entries, next.entries, 'id').map(saveEntry),

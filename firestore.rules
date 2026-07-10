@@ -7,7 +7,13 @@ service cloud.firestore {
     function isStoreManager() { return signedIn() && me().role == 'store_manager'; }
     function isManagerFor(storeId) { return isAreaManager() || (isStoreManager() && me().storeId == storeId); }
     function validMetrics(metrics) { return metrics.keys().hasOnly(['grossAdds','upgrades','homeInternet','watches','tablets','accessories','upgradePlus','ild','leases','billPayAdds','milestoneSheets']); }
-    match /stores/{storeId} { allow read: if signedIn(); allow write: if isManagerFor(storeId); }
+    match /stores/{storeId} {
+      allow read: if signedIn();
+      // Store managers may only edit their own store's contact details (the one write the
+      // client performs); creating or deleting a store document stays area-manager-only.
+      allow update: if isManagerFor(storeId);
+      allow create, delete: if isAreaManager();
+    }
     match /users/{userId} {
       allow create: if signedIn() && request.auth.uid == userId && request.resource.data.role == 'employee' && request.resource.data.status == 'pending';
       allow read: if signedIn() && (request.auth.uid == userId || isManagerFor(resource.data.storeId));

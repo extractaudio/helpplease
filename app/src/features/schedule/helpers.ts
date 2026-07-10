@@ -4,26 +4,20 @@ export function currentTime() {
   return new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Denver', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date())
 }
 
+const addDays = (date: string, days: number) => {
+  const next = new Date(`${date}T00:00:00Z`)
+  next.setUTCDate(next.getUTCDate() + days)
+  return next.toISOString().slice(0, 10)
+}
+
 export function filteredView(shifts: ScheduleShift[], view: 'daily' | 'weekly' | 'monthly', today: string) {
   return shifts.filter(shift =>
     view === 'daily'
       ? shift.businessDate === today
       : view === 'weekly'
-        ? shift.businessDate >= today && shift.businessDate <= `${today.slice(0, 8)}99`
+        ? shift.businessDate >= today && shift.businessDate <= addDays(today, 6)
         : shift.businessDate.startsWith(today.slice(0, 7))
   )
-}
-
-export function storeOpenLabel() {
-  const day = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Denver', weekday: 'short' }).format(new Date())
-  const time = currentTime()
-  return day === 'Sun'
-    ? (time >= '12:00' && time < '17:00' ? 'Open' : 'Closed')
-    : (time >= '10:00' && time < '19:00' ? 'Open' : 'Closed')
-}
-
-export function coverageLabel(shifts: ScheduleShift[]) {
-  return shifts.some(shift => shift.startTime <= '10:00' && shift.endTime >= '19:00') ? 'Covered' : 'Review gaps'
 }
 
 export function googleLink(shift: ScheduleShift | undefined, store: Store) {

@@ -1,6 +1,6 @@
 # Montana PQH Team — System Design
 
-**Status:** Proposed
+**Status:** Implemented
 
 **Last updated:** July 10, 2026
 
@@ -8,9 +8,9 @@
 
 ## 1. Abstract
 
-Montana PQH Team is a React PWA for five Montana stores. It supports a local demo, Google/Firebase live access, employee performance tracking, monthly goals, milestones, schedules, and management views. The current client centralizes application state, routing, layout, and all screens in `src/App.tsx`, which makes changes difficult to review and test.
+Montana PQH Team is a React PWA for five Montana stores. It supports a local demo, Google/Firebase live access, employee performance tracking, monthly goals, milestones, schedules, a store directory, and management views. The client previously centralized application state, routing, layout, and all screens in a single `src/App.tsx`, which made changes difficult to review and test.
 
-The proposed design keeps Firebase, Firestore collections, Cloud Functions, schedule contracts, and PWA behavior intact. It splits the client into an application shell, shared UI, and feature modules, while keeping domain logic and repository code framework-light.
+The client now lives in its own `app/` package (`app/src/`), separate from the `functions/` backend and root-level Firebase configuration. It is split into an application shell (`app/src/app/`), framework-free domain logic and types (`app/src/domain/`), seed/config data (`app/src/data/`), infrastructure services (`app/src/services/`), shared UI (`app/src/shared/`), and one feature module per screen group (`app/src/features/{performance,schedule,administration,stores}/`), each exposing components one-per-file behind an `index.ts` barrel. Firebase, Firestore collections, Cloud Functions, schedule contracts, and PWA behavior are unchanged.
 
 ## 2. Goals and Non-Goals
 
@@ -42,10 +42,12 @@ flowchart LR
   Shell --> Performance[Performance Feature]
   Shell --> Schedule[Schedule Feature]
   Shell --> Administration[Administration Feature]
+  Shell --> Stores[Store Directory Feature]
   Shell --> Shared[Shared UI]
   Performance --> State[Application State]
   Schedule --> State
   Administration --> State
+  Stores --> State
   State --> Repo[Firestore Repository]
   Repo --> Firestore[(Cloud Firestore)]
   Functions[Cloud Functions] --> Firestore
@@ -59,6 +61,7 @@ flowchart LR
 | Performance feature | Daily entries, goals, milestones, dashboard, leaderboard | Firestore `dailyEntries`, `monthlyGoals` | Read-only/pending UI is shown when role/status blocks work. |
 | Schedule feature | My schedule, store schedule, open status, calendar export | Firestore `scheduleShifts`, `scheduleNotifications` | Cached/local data remains visible where Firestore persistence permits. |
 | Administration feature | Profiles and employee management | Firestore `users`, `stores` | Firestore rules remain the authorization boundary. |
+| Store Directory feature | Call/map/message stores, live open status, store-manager contact edits | Firestore `stores` | Store managers may edit only their own store; area managers edit any store. |
 | Cloud Functions | Audit, monthly summaries, Google Sheet reconciliation | Firestore and Functions secrets | Invalid Sheet rows create a failed sync run rather than partial schedule updates. |
 
 ## 5. Request Lifecycle
@@ -115,9 +118,12 @@ flowchart LR
 ## 11. Open Questions
 
 - Whether employee pre-enrollment should use an invite workflow before the employee completes Google onboarding.
-- Whether the production build warning should be addressed with route-level code splitting after this refactor.
+- ~~Whether the production build warning should be addressed with route-level code splitting after this refactor.~~ Resolved: the Firebase SDK (`firebase/app`, `firebase/auth`, `firebase/firestore`, ~700KB) is now loaded via dynamic `import()` behind `loadFirebase()`, so it ships only to sessions that actually enter live mode. The initial bundle dropped from ~884KB to ~249KB.
 - Which organization owns Firebase project provisioning and production monitoring.
+- The `firestore.rules` emulator test suite listed as a launch gate in Section 9 still does not exist; the `stores/{storeId}` rule was tightened (store managers get `update` only, not `create`/`delete`) without automated coverage. Adding `@firebase/rules-unit-testing` + emulator-backed tests remains outstanding.
 
 ## 12. Decision and Next Steps
 
 Adopt feature-based modules with a thin application shell. First extract shared UI and entry/state handling, then move performance, schedule, and administration screens without changing public behavior. Verify the existing test suite and builds after each feature move before splitting the next feature.
+
+This is complete: the client lives in `app/` as a layered module tree, `App.tsx` is reduced to entry-mode gating and composition (`AppShell` for chrome, `AppRouter` for page wiring), and the Vitest suite plus `tsc -b`/`vite build` gate every change.

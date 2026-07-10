@@ -1,5 +1,5 @@
 import { metricKeys } from '@/domain/types'
-import type { Metrics, MilestoneRule } from '@/domain/types'
+import type { DailyEntry, MonthlyGoal, Metrics, MilestoneRule } from '@/domain/types'
 
 export const currentBusinessDate = () =>
   new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Denver' }).format(new Date())
@@ -12,9 +12,18 @@ export const addMetrics = (items: Metrics[]): Metrics =>
     {} as Metrics
   )
 
+export const monthlyActualsFor = (entries: DailyEntry[], employeeId: string, month: string) =>
+  addMetrics(entries.filter(entry => entry.employeeId === employeeId && entry.businessDate.startsWith(month)).map(entry => entry.metrics))
+
+export const monthlyGoalFor = (goals: MonthlyGoal[], employeeId: string, month: string) =>
+  goals.find(goal => goal.employeeId === employeeId && goal.monthKey === month)
+
 export const pacePercent = (date = new Date()) => {
-  const day = Number(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Denver', day: 'numeric' }).format(date))
-  const days = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
+  const denverParts = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Denver', year: 'numeric', month: '2-digit', day: '2-digit' })
+    .formatToParts(date)
+    .reduce<Record<string, string>>((value, part) => ({ ...value, [part.type]: part.value }), {})
+  const day = Number(denverParts.day)
+  const days = new Date(Number(denverParts.year), Number(denverParts.month), 0).getDate()
   return day / days
 }
 

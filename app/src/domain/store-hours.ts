@@ -54,8 +54,12 @@ export function storeHoursSummary(status: StoreOpenStatus, instant: Date) {
   const parts = local(instant)
   const time = `${parts.hour}:${parts.minute}`
   if (time < status.opensAt) return `Opens today at ${displayTime(status.opensAt)}`
-  const tomorrow = local(new Date(instant.getTime() + 24 * 60 * 60 * 1000))
-  const next = hoursForDay(tomorrow.weekday)
+  // Anchor at noon UTC (never near midnight in America/Denver) before adding 24h, so the
+  // result lands on the correct next calendar day even across a DST transition.
+  const today = new Date(`${parts.year}-${parts.month}-${parts.day}T18:00:00Z`)
+  const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000)
+  const nextWeekday = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Denver', weekday: 'short' }).format(tomorrow)
+  const next = hoursForDay(nextWeekday)
   return `Opens tomorrow at ${displayTime(next.opensAt)}`
 }
 

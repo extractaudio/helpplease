@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import { storeName, stores } from '@/data'
-import { PageIntro } from '@/shared/ui'
+import { initials, PageIntro } from '@/shared/ui'
 import type { AppState, Role, StoreId, UserProfile } from '@/domain/types'
-
-const initials = (name: string) => name.split(' ').map(part => part[0]).join('').slice(0, 2)
 
 export function EmployeesPage({ state, user, onChange, isArea }: { state: AppState; user: UserProfile; onChange: (change: (state: AppState) => AppState) => void; isArea: boolean }) {
   const visible = state.profiles.filter(profile => user.role === 'area_manager' || profile.storeId === user.storeId)

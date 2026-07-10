@@ -28,4 +28,10 @@ describe('store hours', () => {
     const instant = new Date('2026-07-12T02:00:00Z')
     expect(storeHoursSummary(storeStatusAt('helena', instant, []), instant)).toBe('Opens tomorrow at 12 PM')
   })
+
+  it('stays correct across a DST spring-forward transition', () => {
+    // Sat Mar 7 2026, 11:30 PM MST in Denver (store closed) -> Sunday, not Monday.
+    const instant = new Date('2026-03-08T06:30:00Z')
+    expect(storeHoursSummary(storeStatusAt('helena', instant, []), instant)).toBe('Opens tomorrow at 12 PM')
+  })
 })

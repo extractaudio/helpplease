@@ -2,9 +2,8 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { Menu, X } from 'lucide-react'
 import { NavButton, nav, SideNav, type Page } from '@/shared/navigation'
+import { initials } from '@/shared/ui'
 import type { UserProfile } from '@/domain/types'
-
-const initials = (name: string) => name.split(' ').map(part => part[0]).join('').slice(0, 2)
 
 export function AppShell({ user, page, isManager, onSelectPage, children }: {
   user: UserProfile

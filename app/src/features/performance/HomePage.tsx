@@ -14,7 +14,7 @@ export function HomePage({ user, actuals, goal, setPage, isManager }: { user: Us
     { p: 'milestones', t: 'Milestone Sheet', d: 'Complete today’s payout checklist' },
     { p: 'leaderboard', t: 'Store Leaderboard', d: 'See all five stores rank' },
     { p: 'open', t: 'Store Status', d: 'Live hours and staff' },
-    { p: 'employees', t: isManager ? 'Employee Setup' : 'My Profile', d: isManager ? 'Manage access and team' : 'Manage your contact details' }
+    { p: isManager ? 'employees' : 'profile', t: isManager ? 'Employee Setup' : 'My Profile', d: isManager ? 'Manage access and team' : 'Manage your contact details' }
   ]
   return (
     <section className="page home-page">

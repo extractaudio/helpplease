@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { storeName, zeroMetrics } from '@/data'
-import { addMetrics, currentMonth } from '@/domain/metrics'
+import { currentMonth, monthlyActualsFor, monthlyGoalFor } from '@/domain/metrics'
 import { MetricForm, PageIntro } from '@/shared/ui'
 import { GoalReadout } from './GoalReadout'
 import type { AppState, Metrics, UserProfile } from '@/domain/types'
@@ -12,10 +12,10 @@ export function GoalsPage({ state, user, onChange, isManager }: { state: AppStat
     : [user]
   const [selected, setSelected] = useState(available[0]?.uid || user.uid)
   const employee = state.profiles.find(profile => profile.uid === selected)!
-  const goal = state.goals.find(item => item.employeeId === selected && item.monthKey === month)
+  const goal = monthlyGoalFor(state.goals, selected, month)
   const [targets, setTargets] = useState<Metrics>(goal?.targets || zeroMetrics())
   useEffect(
-    () => setTargets(state.goals.find(item => item.employeeId === selected && item.monthKey === month)?.targets || zeroMetrics()),
+    () => setTargets(monthlyGoalFor(state.goals, selected, month)?.targets || zeroMetrics()),
     [selected, state.goals, month]
   )
   const save = () =>
@@ -26,7 +26,7 @@ export function GoalsPage({ state, user, onChange, isManager }: { state: AppStat
         { id: `${selected}_${month}`, employeeId: selected, storeId: employee.storeId, monthKey: month, targets }
       ]
     }))
-  const actual = addMetrics(state.entries.filter(entry => entry.employeeId === user.uid && entry.businessDate.startsWith(month)).map(entry => entry.metrics))
+  const actual = monthlyActualsFor(state.entries, user.uid, month)
   return (
     <section className="page">
       <PageIntro

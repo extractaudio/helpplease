@@ -3,13 +3,16 @@ import { stores } from '@/data'
 import { currentBusinessDate } from '@/domain/metrics'
 import { hoursFor } from '@/domain/schedule'
 import { PageIntro, Stat } from '@/shared/ui'
+import { coverageFor } from '@/domain/store-hours'
 import { ShiftCard } from './ShiftCard'
-import { coverageLabel, currentTime } from './helpers'
-import type { AppState, UserProfile } from '@/domain/types'
+import { currentTime } from './helpers'
+import type { AppState, StoreId, UserProfile } from '@/domain/types'
 
-export function StoreSchedulePage({ state, user }: { state: AppState; user: UserProfile }) {
+export function StoreSchedulePage({ state, user, initialStoreId }: { state: AppState; user: UserProfile; initialStoreId?: StoreId }) {
   const allowed = user.role === 'area_manager' ? stores : stores.filter(store => store.id === user.storeId)
-  const [storeId, setStoreId] = useState(allowed[0].id)
+  const [storeId, setStoreId] = useState(() =>
+    initialStoreId && allowed.some(store => store.id === initialStoreId) ? initialStoreId : allowed[0].id
+  )
   const [date, setDate] = useState(currentBusinessDate())
   const shifts = state.shifts
     .filter(shift => shift.storeId === storeId && shift.businessDate === date)
@@ -36,7 +39,7 @@ export function StoreSchedulePage({ state, user }: { state: AppState; user: User
         <Stat label="Scheduled today" value={shifts.length} detail="Active shifts"/>
         <Stat label="Labor hours" value={total.toFixed(1)} detail="Scheduled coverage"/>
         <Stat label="Current worker" value={current?.employeeName || 'None'} detail={current ? `${current.startTime}–${current.endTime}` : 'No active shift'}/>
-        <Stat label="Coverage" value={coverageLabel(shifts)} detail="Published store hours"/>
+        <Stat label="Coverage" value={coverageFor(shifts, date).hasGap ? 'Review gaps' : 'Covered'} detail="Published store hours"/>
       </div>
       <div className="shift-list">
         {shifts.length ? (

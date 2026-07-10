@@ -5,28 +5,34 @@ import { useApplicationState } from '@/app/useApplicationState'
 import { AppShell } from '@/app/AppShell'
 import { AppRouter } from '@/app/AppRouter'
 import { firebaseEnabled } from '@/services/firebase'
-import { addMetrics, currentMonth } from '@/domain/metrics'
+import { currentMonth, monthlyActualsFor, monthlyGoalFor } from '@/domain/metrics'
 import { nextEntryMode, type EntryMode } from '@/domain/entry-mode'
 import type { Page } from '@/shared/navigation'
+import type { StoreId } from '@/domain/types'
 
 export default function App() {
   const [entryMode, setEntryMode] = useState<EntryMode>('welcome')
   const { state, update, session, remote } = useApplicationState(entryMode === 'live')
   const [page, setPage] = useState<Page>('home')
+  const [scheduleStoreId, setScheduleStoreId] = useState<StoreId>()
   const user = state.profiles.find(profile => profile.uid === state.currentUserId) || state.profiles[0]
+
+  if (!user) return <LoadingCard label={entryMode === 'live' ? 'Syncing live workspace…' : 'Preparing your workspace…'}/>
+
   const isManager = user.role !== 'employee'
   const isArea = user.role === 'area_manager'
   const month = currentMonth()
-  const myActuals = addMetrics(
-    state.entries
-      .filter(entry => entry.employeeId === user.uid && entry.businessDate.startsWith(month))
-      .map(entry => entry.metrics)
-  )
-  const myGoal = state.goals.find(goal => goal.employeeId === user.uid && goal.monthKey === month)
+  const myActuals = monthlyActualsFor(state.entries, user.uid, month)
+  const myGoal = monthlyGoalFor(state.goals, user.uid, month)
 
   const signOut = () => {
     if (entryMode === 'demo') { setEntryMode(nextEntryMode('demo', 'leave')); return }
     void signOutUser().finally(() => setEntryMode('welcome'))
+  }
+
+  const goToStoreSchedule = (storeId: StoreId) => {
+    setScheduleStoreId(storeId)
+    setPage('storeSchedule')
   }
 
   if (entryMode === 'welcome')
@@ -54,7 +60,9 @@ export default function App() {
         isArea={isArea}
         actuals={myActuals}
         goal={myGoal}
+        scheduleStoreId={scheduleStoreId}
         selectPage={setPage}
+        onScheduleStore={goToStoreSchedule}
         update={update}
         onSignOut={signOut}
       />

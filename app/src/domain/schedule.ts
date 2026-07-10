@@ -30,8 +30,6 @@ export const hoursFor = (shift: Pick<ScheduleShift, 'startTime' | 'endTime'>) =>
   return Math.max(0, ((eh * 60 + em) - (sh * 60 + sm)) / 60)
 }
 
-export const localDateTime = (date: string, time: string) => new Date(`${date}T${time}:00-06:00`)
-
 export const validateScheduleRow = (row: Partial<ScheduleRow>, profiles: UserProfile[]) => {
   const errors: string[] = []
   for (const header of requiredScheduleHeaders) {

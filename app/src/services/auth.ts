@@ -1,17 +1,31 @@
-import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth'
-import { auth } from '@/services/firebase'
+import type { User } from 'firebase/auth'
+import { firebaseEnabled, loadFirebase } from '@/services/firebase'
 
-const provider = new GoogleAuthProvider()
-provider.addScope('email')
-provider.addScope('profile')
-
-export function signInWithGoogle() {
-  if (!auth) return Promise.reject(new Error('Firebase is not configured.'))
-  return signInWithPopup(auth, provider).then(() => undefined)
+export async function signInWithGoogle() {
+  const { auth } = await loadFirebase()
+  const { GoogleAuthProvider, signInWithPopup } = await import('firebase/auth')
+  const provider = new GoogleAuthProvider()
+  provider.addScope('email')
+  provider.addScope('profile')
+  await signInWithPopup(auth, provider)
 }
 
-export function signOutUser() { return auth ? signOut(auth) : Promise.resolve() }
+export async function signOutUser() {
+  if (!firebaseEnabled) return
+  const { auth } = await loadFirebase()
+  const { signOut } = await import('firebase/auth')
+  await signOut(auth)
+}
 
 export function observeAuth(onValue: (user: User | null) => void, onError: (error: Error) => void) {
-  return auth ? onAuthStateChanged(auth, onValue, onError) : () => undefined
+  if (!firebaseEnabled) return () => undefined
+  let cancelled = false
+  let unsubscribe: (() => void) | undefined
+  Promise.all([loadFirebase(), import('firebase/auth')])
+    .then(([{ auth }, { onAuthStateChanged }]) => {
+      if (cancelled) return
+      unsubscribe = onAuthStateChanged(auth, onValue, onError)
+    })
+    .catch(onError)
+  return () => { cancelled = true; unsubscribe?.() }
 }
