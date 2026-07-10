@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { hydrateAppState, storesForDisplay } from './app-state'
-import { stores } from './data'
+import { hydrateAppState, storesForDisplay } from '@/domain/app-state'
+import { stores } from '@/data'
 
 describe('app state hydration', () => {
   it('adds seeded stores to legacy demo state', () => {

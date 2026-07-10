@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { reconcileScheduleRows } from '../functions/src/schedule-sync'
+import { reconcileScheduleRows } from '../../../functions/src/schedule-sync'
 
 const profile = { uid: 'jamie', fullName: 'Jamie Lee', workEmail: 'jamie@example.com', storeId: 'helena' }
 const row = { 'Shift ID': 'shift-1', 'Employee Name': 'Jamie Lee', 'Work Email': 'jamie@example.com', Store: 'Helena', Date: '2026-07-10', 'Start Time': '10:00', 'End Time': '18:00', 'Job Title': 'Consultant', Notes: '' }

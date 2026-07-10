@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { initialState } from './data'
-import { datePattern, hoursFor, timePattern } from './schedule'
+import { initialState } from '@/data'
+import { datePattern, hoursFor, timePattern } from '@/domain/schedule'
 
 describe('schedule data quality contract', () => {
   it('has one unique source shift key per schedule record', () => {

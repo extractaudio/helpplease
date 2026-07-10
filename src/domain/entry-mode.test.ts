@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { nextEntryMode } from './entry-mode'
+import { nextEntryMode } from '@/domain/entry-mode'
 
 describe('entry mode', () => {
   it('moves from welcome into either local demo or secure live access', () => {

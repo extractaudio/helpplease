@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { canEditStore, mapHref, phoneHref } from './store-directory'
-import type { UserProfile } from './types'
+import { canEditStore, mapHref, phoneHref } from '@/domain/store-directory'
+import type { UserProfile } from '@/domain/types'
 
 const profile = (role: UserProfile['role'], storeId: UserProfile['storeId'] = 'helena'): UserProfile => ({
   uid: 'u1', fullName: 'User', workEmail: 'u@example.com', personalGoogleEmail: 'u@gmail.com',

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { addMetrics, payoutFor, statusFor } from './logic'
-import { initialState, zeroMetrics } from './data'
-import { shiftFromRow, toIcs, validateScheduleRow } from './schedule'
+import { addMetrics, payoutFor, statusFor } from '@/domain/metrics'
+import { initialState, zeroMetrics } from '@/data'
+import { shiftFromRow, toIcs, validateScheduleRow } from '@/domain/schedule'
 
 describe('performance logic', () => {
   it('aggregates each metric independently', () => {

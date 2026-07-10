@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { CalendarDays, MapPin, MessageCircle, Pencil, Phone, X } from 'lucide-react'
-import { PageIntro } from '../../components/ui'
-import { canEditStore, mapHref, phoneHref } from '../../store-directory'
-import { storeHoursSummary, storeStatusAt } from '../../store-hours'
-import type { AppState, Store, StoreId, UserProfile } from '../../types'
+import { PageIntro } from '@/shared/ui'
+import { canEditStore, mapHref, phoneHref } from '@/domain/store-directory'
+import { storeHoursSummary, storeStatusAt } from '@/domain/store-hours'
+import type { AppState, Store, StoreId, UserProfile } from '@/domain/types'
 
 type Props = {
   state: AppState

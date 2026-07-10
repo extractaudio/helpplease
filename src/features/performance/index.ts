@@ -1,0 +1,6 @@
+export { HomePage } from './HomePage'
+export { DailyPage } from './DailyPage'
+export { Dashboard } from './Dashboard'
+export { GoalsPage } from './GoalsPage'
+export { MilestonesPage } from './MilestonesPage'
+export { Leaderboard } from './Leaderboard'

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { coverageFor, storeHoursSummary, storeStatusAt } from './store-hours'
-import type { ScheduleShift } from './types'
+import { coverageFor, storeHoursSummary, storeStatusAt } from '@/domain/store-hours'
+import type { ScheduleShift } from '@/domain/types'
 
 const shift = (startTime: string, endTime: string, businessDate = '2026-07-10'): ScheduleShift => ({ id: `${startTime}-${endTime}`, employeeId: 'jamie', employeeName: 'Jamie Lee', storeId: 'helena', businessDate, startTime, endTime, jobTitle: 'Consultant', notes: '', sourceHash: '', syncedAt: '' })
 

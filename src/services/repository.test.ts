@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { emptyMetrics, normalizeProfile, toCsv } from './repository'
+import { emptyMetrics, normalizeProfile, toCsv } from '@/services/repository'
 
 describe('repository helpers', () => {
   it('normalizes incomplete legacy profiles into an onboarding-safe profile', () => {
