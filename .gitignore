@@ -5,6 +5,7 @@ vite.config.js
 vite.config.d.ts
 .env.local
 .env.*.local
+.superpowers
 
 /functions/node_modules
 
