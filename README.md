@@ -56,3 +56,13 @@ cd app
 npm run test
 npm run build
 ```
+
+## Android APK
+
+The Android package bundles Demo mode locally and includes the Firebase web configuration from `app/.env.local` for the existing Live path. Full native Google authentication is not part of this one-off build.
+
+Prerequisites: Node.js 22+, a compatible JDK, and Android SDK API 36 with Build Tools 36.0.0.
+
+Build from `app/` with `npm run android:apk`. The directly installable debug APK is written to `app/android/app/build/outputs/apk/debug/app-debug.apk`.
+
+To install it, transfer the APK to an Android phone, allow installs from the file/browser source when Android prompts, open the APK, and choose Install. This debug build is for direct testing and is not Play Store or release-signing ready.
