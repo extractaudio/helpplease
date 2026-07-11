@@ -27,7 +27,7 @@
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "@vite-pwa/assets-generator": "^1.0.2",
-    "typescript": "latest",
+    "typescript": "6.0.3",
     "vitest": "latest"
   }
 }
